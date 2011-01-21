@@ -32,15 +32,8 @@ func loadRedirects(filename string) (redirects map[string] string) {
 	return redirects
 }
 
-func statsUpdate(statChan chan *statmsg.Statmsg, context *morestore.Context) {
-	for {
-		stat := <- statChan
-		go context.Update(stat)
-	}
-}
-
 func makeRedirectServer(redirects map[string] string,
-	statChan chan *statmsg.Statmsg) (http.HandlerFunc) {
+	context *morestore.Context) (http.HandlerFunc) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		key := req.URL.Path[1:]
 		url, exists := redirects[key]
@@ -59,7 +52,7 @@ func makeRedirectServer(redirects map[string] string,
 		stat.IP = w.RemoteAddr()
 		stat.Referer = req.Referer
 		stat.UA = req.UserAgent
-		statChan <- &stat
+		context.Update(&stat)
 	}
 }
 
@@ -85,11 +78,8 @@ func main() {
 	context := morestore.Setup("127.0.0.1", "logs",
 		"127.0.0.1:6379", 0, poolSize)
 
-	statChan := make(chan *statmsg.Statmsg, poolSize)
-	go statsUpdate(statChan, context)
-
 	fmt.Printf("Starting web server...\n")
-	http.HandleFunc("/", makeRedirectServer(redirects, statChan))
+	http.HandleFunc("/", makeRedirectServer(redirects, context))
 	err = http.ListenAndServe(":12345", nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't start: %s\n", err.String())
