@@ -2,16 +2,16 @@ package main;
 
 import (
 	"./statmsg"
-	"./nullstore"
+	"./morestore"
 	"runtime"
 	"os"
 	"io/ioutil"
 	"strings"
 	"fmt"
 	"http"
+	"time"
 )
 
-// Channel size 
 const chanBacklog = 1000
 
 func loadRedirects(filename string) (redirects map[string] string) {
@@ -33,10 +33,10 @@ func loadRedirects(filename string) (redirects map[string] string) {
 	return redirects
 }
 
-func statsUpdate(statChan chan *statmsg.Statmsg) {
+func statsUpdate(statChan chan *statmsg.Statmsg, context *morestore.Context) {
 	for {
 		stat := <- statChan
-		go nullstore.Update(stat)
+		go context.Update(stat)
 	}
 }
 
@@ -55,6 +55,7 @@ func makeRedirectServer(redirects map[string] string,
 		w.WriteHeader(http.StatusMovedPermanently)
 
 		var stat statmsg.Statmsg
+		stat.Time = time.UTC()
 		stat.Key = key
 		stat.IP = w.RemoteAddr()
 		stat.Referer = req.Referer
@@ -75,8 +76,12 @@ func main() {
 	fmt.Printf("Loading redirects map...\n")
 	redirects := loadRedirects(os.Args[1])
 
+	fmt.Printf("Connecting to databases...\n")
+	context := morestore.Setup("127.0.0.1", "logs",
+		"127.0.0.1:6379", 0, 100)
+
 	statChan := make(chan *statmsg.Statmsg, chanBacklog)
-	go statsUpdate(statChan)
+	go statsUpdate(statChan, context)
 
 	fmt.Printf("Starting web server...\n")
 	http.HandleFunc("/", makeRedirectServer(redirects, statChan))

@@ -6,7 +6,7 @@ all: ws
 ws: ws.6
 	$(LINKER) -o $@ $<
 
-ws.6: statmsg.6 nullstore.6 ws.go
+ws.6: statmsg.6 morestore.6 ws.go
 	$(GO) ws.go
 
 statmsg.6: statmsg.go
@@ -14,6 +14,9 @@ statmsg.6: statmsg.go
 
 nullstore.6: statmsg.6 nullstore.go
 	$(GO) nullstore.go
+
+morestore.6: statmsg.6 morestore.go
+	$(GO) morestore.go
 
 clean:
 	rm ws *.6
