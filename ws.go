@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const chanBacklog = 1000
+const poolSize = 1000
 
 func loadRedirects(filename string) (redirects map[string] string) {
 	contents, err := ioutil.ReadFile(filename)
@@ -78,9 +78,9 @@ func main() {
 
 	fmt.Printf("Connecting to databases...\n")
 	context := morestore.Setup("127.0.0.1", "logs",
-		"127.0.0.1:6379", 0, 100)
+		"127.0.0.1:6379", 0, poolSize)
 
-	statChan := make(chan *statmsg.Statmsg, chanBacklog)
+	statChan := make(chan *statmsg.Statmsg, poolSize)
 	go statsUpdate(statChan, context)
 
 	fmt.Printf("Starting web server...\n")
