@@ -35,7 +35,7 @@ func (c *Context) pushMongoCollection(collection *mongo.Collection) {
 }
 
 func (c *Context) Update(stat *statmsg.Statmsg) {
-	_, err := c.redisClient.Incr(stat.Key)
+	_, err := c.redisClient.Incr("hit:" + stat.Key)
 	if err != nil {
 		fmt.Printf("Error from redis: %s\n", err.String())
 	}
