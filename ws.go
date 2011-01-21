@@ -10,9 +10,8 @@ import (
 	"fmt"
 	"http"
 	"time"
+	"strconv"
 )
-
-const poolSize = 1000
 
 func loadRedirects(filename string) (redirects map[string] string) {
 	contents, err := ioutil.ReadFile(filename)
@@ -67,9 +66,15 @@ func makeRedirectServer(redirects map[string] string,
 func main() {
 	runtime.GOMAXPROCS(8)
 
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s redirect_map_file\n",
+	if len(os.Args) != 3 {
+		fmt.Fprintf(os.Stderr, "Usage: %s redirect_map pool_size\n",
 			os.Args[0])
+		return
+	}
+
+	poolSize, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "pool size must numeric\n")
 		return
 	}
 
@@ -85,7 +90,7 @@ func main() {
 
 	fmt.Printf("Starting web server...\n")
 	http.HandleFunc("/", makeRedirectServer(redirects, statChan))
-	err := http.ListenAndServe(":12345", nil)
+	err = http.ListenAndServe(":12345", nil)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can't start: %s\n", err.String())
 		return
