@@ -41,6 +41,10 @@ func makeRedirectServer(redirects map[string] string,
 			return
 		}
 
+		/*
+		 * I don't use the http.Redirect because it generates HTML and
+		 * I don't need that
+		 */
 		w.SetHeader("Location", url)
 		w.WriteHeader(http.StatusMovedPermanently)
 
@@ -73,8 +77,7 @@ func main() {
 	redirects := loadRedirects(os.Args[1])
 
 	fmt.Printf("Connecting to databases...\n")
-	context := Setup("127.0.0.1", "logs",
-		"127.0.0.1:6379", 0, poolSize)
+	context := Setup("127.0.0.1", "logs", "127.0.0.1:6379", 0, poolSize)
 
 	fmt.Printf("Starting web server...\n")
 	http.HandleFunc("/", makeRedirectServer(redirects, context))

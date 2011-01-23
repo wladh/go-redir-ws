@@ -29,6 +29,10 @@ func (c *Context) popMongoCollection() (*mongo.Collection, os.Error) {
 	return collection, nil
 }
 
+/*
+ * TODO: add dropped connection detection.
+ */
+
 func (c *Context) pushMongoCollection(collection *mongo.Collection) {
 	c.mongoPool <- collection
 }
