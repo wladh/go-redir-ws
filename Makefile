@@ -1,24 +1,9 @@
-GO=/Users/vlad/go/bin/6g
-LINKER=/Users/vlad/go/bin/6l
+include $(GOROOT)/src/Make.inc
 
-all: ws
+TARG=ws
+GOFILES=\
+	statmsg.go\
+	morestore.go\
+	ws.go
 
-ws: ws.6
-	$(LINKER) -o $@ $<
-
-ws.6: statmsg.6 morestore.6 ws.go
-	$(GO) ws.go
-
-statmsg.6: statmsg.go
-	$(GO) statmsg.go
-
-nullstore.6: statmsg.6 nullstore.go
-	$(GO) nullstore.go
-
-morestore.6: statmsg.6 morestore.go
-	$(GO) morestore.go
-
-clean:
-	rm ws *.6
-
-.PHONY: all clean
+include $(GOROOT)/src/Make.cmd

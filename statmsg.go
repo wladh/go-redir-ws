@@ -1,4 +1,4 @@
-package statmsg
+package main
 
 import (
 	"time"

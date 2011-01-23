@@ -1,7 +1,6 @@
-package morestore
+package main
 
 import (
-	"./statmsg"
 	"github.com/mikejs/gomongo/mongo"
 	"redis"
 	"os"
@@ -34,7 +33,7 @@ func (c *Context) pushMongoCollection(collection *mongo.Collection) {
 	c.mongoPool <- collection
 }
 
-func (c *Context) Update(stat *statmsg.Statmsg) {
+func (c *Context) Update(stat *Statmsg) {
 	_, err := c.redisClient.Incr("hit:" + stat.Key)
 	if err != nil {
 		fmt.Printf("Error from redis: %s\n", err.String())

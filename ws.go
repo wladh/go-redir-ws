@@ -1,8 +1,6 @@
 package main
 
 import (
-	"./statmsg"
-	"./morestore"
 	"runtime"
 	"os"
 	"io/ioutil"
@@ -33,7 +31,7 @@ func loadRedirects(filename string) (redirects map[string] string) {
 }
 
 func makeRedirectServer(redirects map[string] string,
-	context *morestore.Context) (http.HandlerFunc) {
+	context *Context) (http.HandlerFunc) {
 	return func(w http.ResponseWriter, req *http.Request) {
 		key := req.URL.Path[1:]
 		url, exists := redirects[key]
@@ -46,7 +44,7 @@ func makeRedirectServer(redirects map[string] string,
 		w.SetHeader("Location", url)
 		w.WriteHeader(http.StatusMovedPermanently)
 
-		var stat statmsg.Statmsg
+		var stat Statmsg
 		stat.Time = time.UTC()
 		stat.Key = key
 		stat.IP = w.RemoteAddr()
@@ -75,7 +73,7 @@ func main() {
 	redirects := loadRedirects(os.Args[1])
 
 	fmt.Printf("Connecting to databases...\n")
-	context := morestore.Setup("127.0.0.1", "logs",
+	context := Setup("127.0.0.1", "logs",
 		"127.0.0.1:6379", 0, poolSize)
 
 	fmt.Printf("Starting web server...\n")
